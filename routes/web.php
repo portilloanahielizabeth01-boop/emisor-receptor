@@ -1,3 +1,5 @@
+<?php
+
 use App\Http\Controllers\RemoteStyleController;
 use Illuminate\Support\Facades\Route;
 

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Events\RemoteStyleUpdate;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+
+class RemoteStyleUpdate implements ShouldBroadcastNow
 
 class RemoteStyleController extends Controller
 {
