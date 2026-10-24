@@ -1,58 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏁 La Carrera de Multiplicar
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Trabajo práctico de **WebSockets**: un juego en tiempo real para repasar las tablas de multiplicar.
 
-## About Laravel
+Cada alumno juega desde su tablet o celular y el proyector muestra una carrera donde su avatar avanza con cada respuesta correcta. Entre todos cooperan para cumplir la **Misión del Aula** (una meta de respuestas correctas del curso).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tecnologías
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Laravel 13**: rutas, validación, base de datos (SQLite) y eventos
+- **Laravel Reverb**: servidor de WebSockets
+- **Laravel Echo + pusher-js**: cliente WebSocket en el navegador (JavaScript puro)
+- **Blade + CSS**: pantallas del alumno y del tablero
+- **PHPUnit**: tests automáticos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requisitos
 
-## Learning Laravel
+- **PHP 8.4 o superior**, con las extensiones `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl`, `fileinfo` y `curl`
+- **Composer** 2
+- **Node.js 22** o superior
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+No hace falta instalar una base de datos: se usa SQLite (un archivo).
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalación
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/portilloanahielizabeth01-boop/emisor-receptor.git
+cd emisor-receptor
+composer setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`composer setup` instala las dependencias, crea el `.env`, genera la clave, crea la base de datos y compila el JavaScript y el CSS.
 
-## Contributing
+## Ejecutar
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer run carrera
+```
 
-## Code of Conduct
+Levanta los dos servidores juntos: la app en el puerto **8000** y Reverb en el **8080**. Se cortan con `Ctrl+C`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Pantalla | Dirección |
+|---|---|
+| Tablero (docente) | http://localhost:8000/tablero |
+| Alumno | http://localhost:8000/alumno, o http://IP-de-la-PC:8000/alumno desde otro dispositivo (la dirección y el QR aparecen en el tablero) |
 
-## Security Vulnerabilities
+El tablero muestra los controles (Iniciar, Reiniciar, tablas y meta) solo si se abre con `localhost`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Probarlo en una sola computadora
 
-## License
+1. Abrí http://localhost:8000/tablero en una ventana.
+2. Abrí http://localhost:8000/alumno en otra pestaña, elegí nombre y avatar y tocá **¡A jugar!**. Para sumar más alumnos, abrí más pestañas y tocá **"No, soy otro chico"**.
+3. En el tablero elegí una meta chica (por ejemplo 5) y tocá **▶️ Iniciar**.
+4. Respondé desde las pestañas: los avatares avanzan en el tablero al instante.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Para jugar por internet se abren dos túneles de Cloudflare (uno por puerto) y se cargan sus direcciones en `APP_URL` y `REVERB_PUBLIC_HOST` del `.env`.
+
+## Cómo funciona
+
+1. El alumno **envía** sus acciones por HTTP (unirse, responder).
+2. Laravel las valida, guarda el resultado y **publica** un evento en Reverb.
+3. Reverb **empuja** el evento por WebSocket a todos los navegadores suscritos.
+
+El servidor es el único que publica: así un alumno no puede mandar "acerté" sin haber acertado.
+
+### Canales
+
+| Canal | Tipo | Para qué |
+|---|---|---|
+| `carrera` | Público | Tablero, inicio, reinicio y misión cumplida, para todos |
+| `alumno.{id}` | Privado | Las preguntas y resultados de cada alumno |
+| `docente` | Privado | El reporte de errores en vivo, solo para la docente |
+| `aula` | Presencia | Saber quién está conectado (`here`, `joining`, `leaving`) |
+
+### Eventos
+
+`AlumnoUnido`, `NuevaPregunta`, `ResultadoRespuesta`, `ErrorRegistrado`, `TableroActualizado`, `JuegoIniciado`, `MisionCumplida` y `JuegoReiniciado`, en [app/Events/](app/Events/).
+
+## Tests
+
+```bash
+php artisan test
+```
+
+## Mi Anotación.
+
+La estructura base del proyecto la armé yo sola, siguiendo la guía del profesor sobre emisor-receptor con WebSockets. A partir de esa base fui modificando el proyecto hasta convertirlo en el juego de la carrera.
+
+Para otra etapa usé la asistencia de **Claude Code** (IA de Anthropic), que me ayudo y me explico a generar parte del código del juego. Yo definí qué necesitaba el juego y me encargué de la puesta en marcha:
+
+- **Conexión de las tablets en la red del aula:** levantar los servidores para que acepten conexiones de la red y conectar los dispositivos por wifi con la dirección y el QR del tablero para usarlo con un grupo de alumnos en mi trabajo.
+- **Tunelización con Cloudflare Tunnel:** instalar `cloudflared`, abrir los dos túneles (uno para la app y otro para Reverb) y configurar el `.env` con las direcciones públicas, para que mis compañeros pudieran jugar desde sus casas.
+- **Pruebas con mis compañeros:** probar el juego en una clase virtual y verificar que los avatares y la Misión del Aula se actualizaran en tiempo real.

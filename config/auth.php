@@ -42,6 +42,15 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // La Carrera de Multiplicar: los "drivers" se definen en AppServiceProvider.
+        'alumno' => [
+            'driver' => 'token-alumno',
+        ],
+
+        'docente' => [
+            'driver' => 'docente-local',
+        ],
     ],
 
     /*

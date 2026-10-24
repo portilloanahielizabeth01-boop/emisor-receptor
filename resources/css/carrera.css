@@ -1,0 +1,747 @@
+/*
+ * carrera.css — Estilos de "La Carrera de Multiplicar".
+ *
+ * CSS común (sin frameworks) para que se entienda línea por línea.
+ * Usamos clamp(mínimo, ideal, máximo) para que los tamaños se adapten
+ * solos a la pantalla: tablet chica, tablet grande o proyector.
+ */
+
+/* ---------- Colores y base ---------- */
+:root {
+    --cielo: #e0f2fe;
+    --tinta: #1e293b;
+    --blanco: #ffffff;
+    --rojo: #ef4444;
+    --azul: #3b82f6;
+    --verde: #22c55e;
+    --naranja: #f59e0b;
+    --violeta: #8b5cf6;
+    --gris: #94a3b8;
+    --sombra: 0 6px 0 rgba(0, 0, 0, 0.18);
+    --redondeo: 24px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    color: var(--tinta);
+    background: linear-gradient(180deg, var(--cielo) 0%, #fef9c3 100%);
+    min-height: 100vh;
+    /* En tablets: que no se seleccione texto al tocar rápido. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+/* ---------- Piezas comunes ---------- */
+.titulo-juego {
+    margin: 0.5em 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: var(--violeta);
+    text-shadow: 2px 2px 0 var(--blanco);
+}
+
+.tarjeta {
+    background: var(--blanco);
+    border-radius: var(--redondeo);
+    box-shadow: var(--sombra);
+    padding: clamp(1rem, 3vw, 2rem);
+}
+
+.tarjeta-centrada {
+    max-width: 640px;
+    margin: 8vh auto 0;
+    text-align: center;
+}
+
+.etiqueta {
+    display: block;
+    margin: 0.4em 0;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: bold;
+}
+
+.texto-grande {
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    margin: 0.4em 0;
+}
+
+.texto-mediano {
+    font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+}
+
+.avatar-gigante {
+    font-size: clamp(5rem, 18vw, 9rem);
+    line-height: 1.1;
+}
+
+.mensaje-error {
+    color: var(--rojo);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.aviso-conexion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 0.5em;
+    text-align: center;
+    font-weight: bold;
+    background: var(--naranja);
+    color: var(--blanco);
+}
+
+/* Colores de botones (se combinan con .boton-grande, .boton-opcion, etc.) */
+.boton-rojo { background: var(--rojo); }
+.boton-azul { background: var(--azul); }
+.boton-verde { background: var(--verde); }
+.boton-naranja { background: var(--naranja); }
+.boton-gris { background: var(--gris); }
+
+.boton-grande {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.7em;
+    border: 0;
+    border-radius: var(--redondeo);
+    box-shadow: var(--sombra);
+    color: var(--blanco);
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: bold;
+}
+
+.boton-grande:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+}
+
+.boton-chico {
+    margin-top: 1rem;
+    border: 0;
+    background: none;
+    color: var(--azul);
+    font-size: 1.2rem;
+    text-decoration: underline;
+}
+
+/* ========================================================================
+ * PANTALLA DEL ALUMNO
+ * ======================================================================== */
+.pagina-alumno .pantalla {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.campo-nombre {
+    width: 100%;
+    padding: 0.4em 0.6em;
+    border: 4px solid var(--azul);
+    border-radius: 16px;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    user-select: text;
+}
+
+.grilla-avatares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 0.6rem;
+}
+
+/* El radio button real se esconde; se ve solo el emoji en una cajita. */
+.opcion-avatar input {
+    position: absolute;
+    opacity: 0;
+}
+
+.opcion-avatar span {
+    display: block;
+    padding: 0.15em 0;
+    border: 4px solid transparent;
+    border-radius: 18px;
+    background: #f1f5f9;
+    text-align: center;
+    font-size: 3.2rem;
+    transition: transform 0.15s;
+}
+
+.opcion-avatar input:checked + span {
+    border-color: var(--violeta);
+    background: #ede9fe;
+    transform: scale(1.1);
+}
+
+.avatar-esperando {
+    animation: flotar 2s ease-in-out infinite;
+}
+
+/* Barra superior del juego */
+.barra-alumno {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+    font-weight: bold;
+}
+
+.chip-alumno,
+.chip-aciertos {
+    padding: 0.2em 0.7em;
+    border-radius: 999px;
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+}
+
+.mision-mini {
+    position: relative;
+    height: 2.2rem;
+    margin: 1rem 0 0;
+    border-radius: 999px;
+    background: var(--blanco);
+    overflow: hidden;
+    box-shadow: inset 0 0 0 3px var(--violeta);
+}
+
+.mision-mini-relleno {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--violeta), #ec4899);
+    transition: width 0.6s ease;
+}
+
+.mision-mini-texto {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: bold;
+}
+
+/* La operación: ¡bien grande! */
+.operacion {
+    margin: 0.3em 0;
+    text-align: center;
+    font-size: clamp(4rem, 15vw, 8.5rem);
+    font-weight: bold;
+    color: var(--tinta);
+}
+
+.operacion .signo {
+    color: var(--violeta);
+}
+
+.operacion.entrar {
+    animation: aparecer 0.35s ease-out;
+}
+
+/* 4 botones de respuesta en grilla de 2 × 2 */
+.opciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.8rem, 2.5vw, 1.4rem);
+}
+
+.boton-opcion {
+    min-height: clamp(110px, 20vh, 180px);
+    border: 0;
+    border-radius: var(--redondeo);
+    box-shadow: var(--sombra);
+    color: var(--blanco);
+    font-size: clamp(3rem, 10vw, 5.5rem);
+    font-weight: bold;
+    transition: transform 0.15s, opacity 0.3s;
+}
+
+.boton-opcion:active:not(:disabled) {
+    transform: translateY(4px) scale(0.98);
+}
+
+.boton-opcion.elegida {
+    outline: 6px solid var(--tinta);
+}
+
+.boton-opcion.correcta {
+    animation: festejar 0.6s ease;
+    outline: 6px solid #fde047;
+}
+
+/* Opción equivocada: se oscurece con una ✗. Los botones ya son de colores
+   (uno es rojo), por eso el error se marca con gris oscuro y no con rojo. */
+.boton-opcion.incorrecta {
+    background: var(--tinta);
+    opacity: 0.6;
+    animation: sacudir 0.4s ease;
+}
+
+.boton-opcion.incorrecta::after {
+    content: ' ✗';
+}
+
+/* La opción que era la correcta queda resaltada mientras dura el aviso. */
+.boton-opcion.era-correcta {
+    outline: 6px solid var(--verde);
+    box-shadow: 0 0 0 12px rgba(34, 197, 94, 0.35), var(--sombra);
+}
+
+/* Aviso de error: una franja arriba, para que se sigan viendo los botones. */
+.aviso-error {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    z-index: 40;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.aviso-error-contenido {
+    padding: 0.4em 1.2em;
+    border-radius: var(--redondeo);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+    border: 4px solid var(--naranja);
+    text-align: center;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: bold;
+    color: var(--tinta);
+    animation: aparecer 0.25s ease-out;
+}
+
+.aviso-error-sigue {
+    font-size: 0.55em;
+    color: var(--naranja);
+}
+
+/* Festejo encima de todo */
+.festejo {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+}
+
+.festejo-contenido {
+    text-align: center;
+    font-size: clamp(3rem, 12vw, 6rem);
+    font-weight: bold;
+    color: var(--verde);
+    text-shadow: 3px 3px 0 var(--blanco);
+    animation: festejar 0.8s ease;
+}
+
+.mision-cumplida {
+    animation: festejar 1s ease;
+}
+
+/* ========================================================================
+ * PANTALLA DEL PROYECTOR
+ * ======================================================================== */
+.tablero-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.chip-estado {
+    padding: 0.3em 1em;
+    border-radius: 999px;
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.tablero-cuerpo {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+    padding: 0 1.5rem 1.5rem;
+}
+
+/* En pantallas angostas, la columna lateral pasa abajo. */
+@media (max-width: 900px) {
+    .tablero-cuerpo {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Misión del aula */
+.mision-titulo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.3em;
+}
+
+.mision-barra {
+    position: relative;
+    height: 3.5rem;
+    border-radius: 999px;
+    background: var(--blanco);
+    box-shadow: inset 0 0 0 4px var(--violeta), var(--sombra);
+    overflow: hidden;
+}
+
+.mision-relleno {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--violeta), #ec4899, var(--naranja));
+    transition: width 0.8s ease;
+}
+
+.mision-texto {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* La pista */
+.pista {
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    border-radius: var(--redondeo);
+    background: #4b5563;
+    box-shadow: var(--sombra);
+}
+
+.pista-vacia {
+    margin: 2rem;
+    text-align: center;
+    color: var(--blanco);
+    font-size: 1.6rem;
+}
+
+.carril {
+    display: grid;
+    grid-template-columns: 9rem 1fr 4.5rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.2rem 0;
+    border-bottom: 3px dashed rgba(255, 255, 255, 0.5);
+    color: var(--blanco);
+    transition: opacity 0.4s;
+}
+
+.carril:last-child {
+    border-bottom: 0;
+}
+
+.carril-nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.carril-puntos {
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: right;
+}
+
+/*
+ * El camino tiene una línea de llegada a cuadros al final.
+ * El corredor se mueve con la variable --avance (0 = salida, 1 = meta)
+ * que pone JavaScript; "transition" hace que el movimiento sea animado.
+ */
+.carril-camino {
+    position: relative;
+    height: 3.6rem;
+    border-right: 14px solid;
+    border-image: repeating-linear-gradient(0deg, #fff 0 7px, #111 7px 14px) 14;
+}
+
+.corredor {
+    --avance: 0;
+    position: absolute;
+    top: 50%;
+    left: calc(var(--avance) * (100% - 3.2rem));
+    font-size: 2.8rem;
+    line-height: 1;
+    /* Los emojis de autos miran a la izquierda: los damos vuelta hacia la meta. */
+    transform: translateY(-50%) scaleX(-1);
+    transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.corredor.salto {
+    animation: saltar 0.5s ease;
+}
+
+/* Alumno desconectado: se ve "dormido" pero no pierde su lugar. */
+.carril.dormido {
+    opacity: 0.4;
+}
+
+.carril.dormido .carril-nombre::after {
+    content: ' 😴';
+}
+
+.carril.llego .carril-puntos::before {
+    content: '🏁 ';
+}
+
+/* Columna lateral */
+.tablero-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tarjeta-qr {
+    text-align: center;
+}
+
+.tarjeta-qr canvas {
+    max-width: 100%;
+}
+
+.url-aula {
+    margin: 0.3em 0 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    word-break: break-all;
+    color: var(--azul);
+    user-select: text;
+}
+
+.controles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.selector-tablas {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+}
+
+.opcion-tabla input {
+    position: absolute;
+    opacity: 0;
+}
+
+.opcion-tabla span {
+    display: block;
+    padding: 0.3em 0;
+    border-radius: 12px;
+    background: #f1f5f9;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.opcion-tabla input:checked + span {
+    background: var(--violeta);
+    color: var(--blanco);
+}
+
+.campo-meta {
+    padding: 0.3em;
+    border: 3px solid var(--violeta);
+    border-radius: 12px;
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+.boton-control {
+    padding: 0.5em;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: var(--sombra);
+    color: var(--blanco);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.boton-control:active {
+    transform: translateY(3px);
+}
+
+.nota-docente {
+    color: #64748b;
+    text-align: center;
+}
+
+/* Reporte de errores (solo en la compu de la docente) */
+.reporte-errores {
+    margin-top: 1rem;
+}
+
+.reporte-titulo {
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.reporte-nota {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #64748b;
+}
+
+.chip-total {
+    padding: 0.05em 0.6em;
+    border-radius: 999px;
+    background: var(--naranja);
+    color: var(--blanco);
+}
+
+.errores-por-tabla,
+.errores-operaciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.chip-tabla-error {
+    padding: 0.2em 0.7em;
+    border-radius: 12px;
+    background: #fff7ed;
+    border: 2px solid var(--naranja);
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.errores-por-alumno {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.fila-errores-alumno {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.errores-alumno-nombre {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.chip-operacion-error {
+    padding: 0.15em 0.6em;
+    border-radius: 10px;
+    background: #f1f5f9;
+    font-size: 1.05rem;
+}
+
+/* Avisos "¡Llegó Juan!" */
+.avisos {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 30;
+}
+
+.aviso {
+    padding: 0.6em 1.2em;
+    border-radius: 999px;
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+    font-size: 1.5rem;
+    font-weight: bold;
+    animation: aparecer 0.3s ease-out;
+}
+
+/* Festejo final en el proyector */
+.overlay-mision {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: grid;
+    place-items: center;
+    background: rgba(139, 92, 246, 0.85);
+}
+
+.overlay-mision-contenido {
+    text-align: center;
+    color: var(--blanco);
+    animation: festejar 1s ease;
+}
+
+.overlay-mision-contenido h2 {
+    margin: 0;
+    font-size: clamp(3rem, 9vw, 7rem);
+}
+
+.overlay-mision-contenido p {
+    font-size: 2rem;
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes aparecer {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes festejar {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.15) rotate(-3deg); }
+    60% { transform: scale(0.95) rotate(3deg); }
+    100% { transform: scale(1); }
+}
+
+@keyframes sacudir {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+@keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+}
+
+@keyframes saltar {
+    0%, 100% { transform: translateY(-50%) scaleX(-1); }
+    40% { transform: translateY(-110%) scaleX(-1) rotate(-10deg); }
+}
+
+/* Si el dispositivo pide "menos movimiento", bajamos las animaciones. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
